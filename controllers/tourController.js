@@ -3,6 +3,7 @@ import Tour from '../models/tourModel.js';
 ////////////////////////////////////////////////
 // TOUR ROUTE HANDLERS
 
+// GET Tours
 const getAllTours = async (req, res) => {
   try {
     const tours = await Tour.find({});
@@ -18,6 +19,7 @@ const getAllTours = async (req, res) => {
   }
 };
 
+// Get Tour by ID
 const getTour = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);
@@ -59,6 +61,7 @@ const updateTour = async (req, res) => {
   }
 };
 
+// DELETE Tour
 const deleteTour = (req, res) => {
   res.status(204).json({ status: 'success', data: null });
 };
@@ -69,5 +72,4 @@ export default {
   createTour,
   updateTour,
   deleteTour,
-  checkId,
 };
