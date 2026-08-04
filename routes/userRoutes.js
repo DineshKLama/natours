@@ -1,44 +1,21 @@
 import express from 'express';
-
-////////////////////////////////////////////////////
-// USER ROUTE HANDLERS
-
-const getAllUsers = (req, res) => {
-  res
-    .status(500)
-    .json({ status: 'error', message: 'This route is not defined!' });
-};
-
-const getUser = (req, res) => {
-  res
-    .status(500)
-    .json({ status: 'error', message: 'This route is not defined!' });
-};
-
-const createUser = (req, res) => {
-  res
-    .status(500)
-    .json({ status: 'error', message: 'This route is not defined!' });
-};
-
-const updateUser = (req, res) => {
-  res
-    .status(500)
-    .json({ status: 'error', message: 'This route is not defined!' });
-};
-
-const deleteUser = (req, res) => {
-  res
-    .status(500)
-    .json({ status: 'error', message: 'This route is not defined!' });
-};
+import userController from '../controllers/userController.js';
 
 ///////////////////////////////////////////////
 // API ROUTES
 
 const userRouter = express.Router();
 
-userRouter.route('/').get(getAllUsers).post(createUser);
-userRouter.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+// userRouter.param('id', )
+
+userRouter
+  .route('/')
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
+userRouter
+  .route('/:id')
+  .get(userController.getUser)
+  .patch(userController.updateUser)
+  .delete(userController.deleteUser);
 
 export default userRouter;

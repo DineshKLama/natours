@@ -1,84 +1,21 @@
 import express from 'express';
-import fs from 'node:fs';
-
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-// Globle Variables for ES Module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const app = express();
-
-// Reading JSON FILE
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
-);
-
-////////////////////////////////////////////////
-const getAllTours = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    requstedTime: req.requstedTime,
-    results: tours.length,
-    data: { tours: tours },
-  });
-};
-
-const getTour = (req, res) => {
-  console.log(req.params);
-
-  const id = Number(req.params.id);
-  const tour = tours.find((el) => el.id === id);
-
-  if (!tour) {
-    return res.status(404).json({ status: 'fail', message: 'Invailed ID' });
-  }
-
-  res.status(201).json({ status: 'success', data: { tour: tour } });
-};
-
-const createTour = (req, res) => {
-  //   console.log(req.body);
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = { id: newId, ...req.body };
-
-  tours.push(newTour);
-
-  // Rewriting the Json file
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({ status: 'success', data: { tour: newTour } });
-    },
-  );
-};
-
-const updateTour = (req, res) => {
-  if (Number(req.params.id) > tours.length) {
-    return res.status(404).json({ status: 'fail', message: 'Invalid ID' });
-  }
-
-  res
-    .status(200)
-    .json({ status: 'success', data: { tour: '<Updated tour here...>' } });
-};
-
-const deleteTour = (req, res) => {
-  if (Number(req.params.id) > tours.length) {
-    return res.status(404).json({ status: 'fail', message: 'Invalid ID' });
-  }
-
-  res.status(204).json({ status: 'success', data: null });
-};
+import tourController from '../controllers/tourController.js';
 
 /////////////////////////////////////////////////
 // API ROUTES
 
 const tourRouter = express.Router();
 
-tourRouter.route('/').get(getAllTours).post(createTour);
-tourRouter.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
+// tourRouter.param('id', tourController.checkId);
+
+tourRouter
+  .route('/')
+  .get(tourController.getAllTours)
+  .post(tourController.createTour);
+tourRouter
+  .route('/:id')
+  .get(tourController.getTour)
+  .patch(tourController.updateTour)
+  .delete(tourController.deleteTour);
 
 export default tourRouter;
