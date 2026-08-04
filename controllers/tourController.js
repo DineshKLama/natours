@@ -47,7 +47,7 @@ const createTour = async (req, res) => {
   }
 };
 
-// Update Tour
+// UPDATE Tour
 const updateTour = async (req, res) => {
   try {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
@@ -62,8 +62,21 @@ const updateTour = async (req, res) => {
 };
 
 // DELETE Tour
-const deleteTour = (req, res) => {
-  res.status(204).json({ status: 'success', data: null });
+const deleteTour = async (req, res) => {
+  try {
+    const tourId = req.params.id;
+    const tour = await Tour.findByIdAndDelete(tourId);
+
+    if (!tour) {
+      return res.status(400).json({ status: 'fail', message: 'Server Error' });
+    }
+
+    res
+      .status(201)
+      .json({ status: 'success', message: 'Deleted Successfully' });
+  } catch (err) {
+    res.status(404).json({ status: 'fail', message: err.message });
+  }
 };
 
 export default {
