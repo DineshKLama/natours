@@ -8,12 +8,13 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon --experimental-specifier-resolution=node server.js",
+    "start": "cross-env NODE_ENV=development nodemon server.js",
     "start:prod": "nodemon NODE_ENV=production server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongodb": "^7.5.0",
