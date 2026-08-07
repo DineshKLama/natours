@@ -7,8 +7,45 @@ import Tour from '../models/tourModel.js';
  */
 export const getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    // BUilD QUERY
+    // 1) Filtering
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach((field) => delete queryObj[field]);
 
+    // Advanced Filtering
+    // console.log(req.query);
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // ------------------------------------------------------------------
+    // 2) SORTING
+    // ------------------------------------------------------------------
+    // Example: ?sort=-price,ratingsAverage -> query.sort('-price ratingsAverage')
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    } else {
+      // Default sort by creation date descending (newest first)
+      query = query.sort('-createdAt');
+    }
+
+    // 3) FIELD LIMITING
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      query = query.select('-__v');
+    }
+
+    // ------------------------------------------------------------------
+    // EXECUTE QUERY
+    // ------------------------------------------------------------------
+    const tours = await query;
+
+    // SEND RESPONSE
     res.status(200).json({
       status: 'success',
       requestTime: req.requestTime,

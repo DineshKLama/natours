@@ -13,6 +13,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+// Enable extended query parsing (place this near top of app.js)
+app.set('query parser', 'extended');
+
 // ==========================================
 // 1. GLOBAL MIDDLEWARES
 // ==========================================

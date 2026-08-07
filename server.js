@@ -1,19 +1,7 @@
 import dns from 'node:dns/promises';
 import { config } from 'dotenv';
 import mongoose from 'mongoose';
-
-// ==========================================
-// 1. PROCESS & ENVIRONMENT INITIALIZATION
-// ==========================================
-
-// Handle synchronous global exceptions (e.g., referencing undefined variables)
-// Must be declared BEFORE any other code executes to catch early runtime errors
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down server...');
-  console.error(`${err.name}: ${err.message}`);
-  console.error(err.stack);
-  process.exit(1);
-});
+import app from './app.js';
 
 // Configure custom DNS servers (resolves ISP-level DNS resolution issues with MongoDB Atlas)
 dns.setServers(['1.1.1.1', '8.8.8.8']);
@@ -25,11 +13,8 @@ config({
   override: true,
 });
 
-// Deferred import of app to ensure environment variables load first
-const { default: app } = await import('./app.js');
-
 // ==========================================
-// 2. DATABASE CONNECTION
+//  DATABASE CONNECTION
 // ==========================================
 
 // Construct MongoDB connection URI by populating the password placeholder
@@ -55,36 +40,13 @@ mongoose
   });
 
 // ==========================================
-// 3. SERVER BOOTSTRAP
+//  SERVER BOOTSTRAP
 // ==========================================
 
 const PORT = process.env.PORT || 3000;
 
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(
-    `App running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode...`,
+    `App running on port ${PORT} in ${process.env.NODE_ENV || 'Production'} mode...`,
   );
-});
-
-// ==========================================
-// 4. PROCESS SAFETY NETS & SHUTDOWN HANDLERS
-// ==========================================
-
-// Handle unhandled promise rejections (e.g., asynchronous network/DB connection drops)
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down server...');
-  console.error(`${err.name}: ${err.message}`);
-
-  // Gracefully close server before terminating process
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-// Graceful shutdown on termination signals (e.g., Heroku/Docker/SIGTERM)
-process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully...');
-  server.close(() => {
-    console.log('💥 Process terminated!');
-  });
 });

@@ -6,8 +6,12 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A tour must have a name'],
       unique: true,
+      trim: true,
     },
-    duration: { type: Number, required: [true, 'A tour must have a duration'] },
+    duration: {
+      type: Number,
+      required: [true, 'A tour must have a duration'],
+    },
     maxGroupSize: {
       type: Number,
       required: [true, 'A tour must have a Group Size'],
@@ -17,23 +21,37 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'A tour must have a difficulty'],
       trim: true,
     },
-    ratingAverage: { type: Number, default: 4.5 },
-    ratingsQuantity: Number,
-    price: { type: Number, required: [true, 'A tour must have a price'] },
-    summary: { type: String, trim: true },
+    ratingsAverage: {
+      type: Number,
+      default: 4.5,
+    },
+    ratingsQuantity: {
+      type: Number,
+      default: 0,
+    },
+    price: {
+      type: Number,
+      required: [true, 'A tour must have a price'],
+    },
+    summary: {
+      type: String,
+      trim: true,
+    },
     description: {
       type: String,
       required: [true, 'A tour must have a description'],
+      trim: true,
     },
     imageCover: {
       type: String,
       required: [true, 'A tour must have a cover image'],
+      select: false,
     },
     images: [String],
-    startDates: [String],
+    startDates: [Date], // IMPROVED: Storing as Date objects enables date filtering & sorting
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   },
 );
 
