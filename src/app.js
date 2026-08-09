@@ -53,8 +53,6 @@ app.all('/*splat', (req, res, next) => {
     status: 'fail',
     message: `Can't find ${req.originalUrl} on this server!`,
   });
-
-  next();
 });
 
 export default app;
