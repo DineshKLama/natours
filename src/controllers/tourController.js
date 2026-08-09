@@ -40,6 +40,18 @@ export const getAllTours = async (req, res) => {
       query = query.select('-__v');
     }
 
+    // 4) PAGINATION AND LIMIT
+    const page = req.query.page * 1 || 10;
+    const limit = req.query.limit * 1 || 100;
+    const pageIndex = (page - 1) * limit;
+
+    if (req.query.page) {
+      const countItem = await Tour.countDocuments();
+      query = query.skip(pageIndex).limit(limit);
+
+      if (pageIndex >= countItem) throw new Error('This page does not exist');
+    }
+
     // ------------------------------------------------------------------
     // EXECUTE QUERY
     // ------------------------------------------------------------------
