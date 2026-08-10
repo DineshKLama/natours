@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import slugify from 'slugify';
 
 const tourSchema = new mongoose.Schema(
   {
@@ -39,7 +40,6 @@ const tourSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: [true, 'A tour must have a description'],
       trim: true,
     },
     imageCover: {
@@ -49,6 +49,8 @@ const tourSchema = new mongoose.Schema(
     },
     images: [String],
     startDates: [Date], // IMPROVED: Storing as Date objects enables date filtering & sorting
+    slug: String,
+    secretTour: { type: Boolean, default: false },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
@@ -60,6 +62,22 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
+
+//DOCUMENT MIDDLEWARE: runs before .save() and .create()
+tourSchema.pre('save', async function () {
+  this.slug = slugify(this.name, { lower: true });
+});
+
+// QUERY MIDDLEWARE
+tourSchema.pre(/^find/, async function () {
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+});
+
+/* tourSchema.post(/^find/, function (docs) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  console.log(docs);
+}); */
 
 const Tour = mongoose.model('Tour', tourSchema);
 

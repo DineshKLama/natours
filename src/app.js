@@ -29,7 +29,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json({ limit: '10kb' }));
 
 // Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(`${__dirname}/../`, 'public')));
 
 // Custom middleware: Attach request timestamp to the request object
 app.use((req, res, next) => {
