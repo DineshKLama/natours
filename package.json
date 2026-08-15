@@ -8,8 +8,10 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=development nodemon src/server.js",
+    "start": "node src/server.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
     "start:prod": "nodemon NODE_ENV=production src/server.js",
+    "debug": "ndb src/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -17,7 +19,8 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.9.1",
-    "slugify": "^1.6.9"
+    "slugify": "^1.6.9",
+    "validator": "^13.15.35"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -28,5 +31,8 @@
     "globals": "^17.8.0",
     "morgan": "^1.11.0",
     "prettier": "^3.9.6"
+  },
+  "allowScripts": {
+    "puppeteer-core@1.12.2": true
   }
 }

@@ -48,7 +48,7 @@ class APIFeatures {
     const pageIndex = (page - 1) * limit;
 
     if (this.queryString.page) {
-      this.querythis.query.skip(pageIndex).limit(limit);
+      this.query = this.query.skip(pageIndex).limit(limit);
     }
 
     return this;

@@ -21,7 +21,7 @@ const getAllTours = async (req, res) => {
     // ------------------------------------------------------------------
     // EXECUTE QUERY
     // ------------------------------------------------------------------
-    const features = new APIFeatures(Tour, req.query)
+    const features = new APIFeatures(Tour.find(), req.query)
       .filter()
       .sort()
       .limitFields()
