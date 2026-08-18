@@ -6,6 +6,8 @@ import morgan from 'morgan';
 // Router imports
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import AppError from './utils/appError.js';
+import { globalError } from './controllers/errorController.js';
 
 // Construct __dirname for ES Modules (Node.js ESM workaround)
 
@@ -26,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Body parser: Reads data from body into req.body (limit to prevent overload)
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '16kb' }));
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(`${__dirname}/../`, 'public')));
@@ -49,10 +51,14 @@ app.use('/api/v1/users', userRouter);
 // ==========================================
 
 app.all('/*splat', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl} on this server!`,
-  });
+  const err = new AppError(
+    `Can't find ${req.originalUrl} on this server!`,
+    404,
+  );
+
+  next(err);
 });
+
+app.use(globalError);
 
 export default app;

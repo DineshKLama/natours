@@ -11,6 +11,7 @@ config({
   path: './.env',
   debug: true,
   override: true,
+  quiet: true,
 });
 
 // ==========================================

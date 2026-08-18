@@ -9,9 +9,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
-    "start:prod": "nodemon NODE_ENV=production src/server.js",
-    "debug": "ndb src/server.js",
+    "dev": "nodemon src/server.js",
+    "start:prod": "cross-env NODE_ENV=production nodemon src/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
