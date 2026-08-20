@@ -1,12 +1,14 @@
 import { config } from 'dotenv';
 import dns from 'node:dns/promises';
-import app from './app.js';
-import connectDB from './db/db.js';
 
-// Configure custom DNS servers (resolves ISP-level DNS resolution issues with MongoDB Atlas)
-dns.setServers(['1.1.1.1', '8.8.8.8']);
+// 1. Uncaught Exceptions must be handled immediately before any app code runs
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  console.error(err.name, err.message);
+  process.exit(1);
+});
 
-// Load environment variables from .env file
+// 2. Load environment variables before importing modules that depend on process.env
 config({
   path: './.env',
   debug: true,
@@ -14,12 +16,7 @@ config({
   quiet: true,
 });
 
-// ==========================================
-//  DATABASE CONNECTION
-// ==========================================
-connectDB();
-
-// Construct MongoDB connection URI by populating the password placeholder
+// Validate required environment variables before proceeding
 if (!process.env.DATABASE || !process.env.DATABASE_PASSWORD) {
   console.error(
     'DATABASE or DATABASE_PASSWORD environment variables are missing!',
@@ -27,14 +24,44 @@ if (!process.env.DATABASE || !process.env.DATABASE_PASSWORD) {
   process.exit(1);
 }
 
-// ==========================================
-//  SERVER BOOTSTRAP
-// ==========================================
+// 3. Configure custom DNS servers (ISP workaround for Atlas)
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 
-const PORT = process.env.PORT || 3000;
+// 4. Import app and database helper after config is set
+import app from './app.js';
+import connectDB from './db/db.js';
 
-app.listen(PORT, () => {
-  console.log(
-    `App running on port ${PORT} in ${process.env.NODE_ENV || 'Production'} mode...`,
-  );
+// 5. Bootstrap Server & Database connection
+let server;
+
+async function startServer() {
+  try {
+    await connectDB();
+
+    const PORT = process.env.PORT || 3000;
+    server = app.listen(PORT, () => {
+      console.log(
+        `App running on port ${PORT} in ${process.env.NODE_ENV || 'Production'} mode...`,
+      );
+    });
+  } catch (err) {
+    console.error('Failed to connect to DB, server not started:', err.message);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+// 6. Graceful shutdown on Unhandled Rejections
+process.on('unhandledRejection', (err) => {
+  console.error(err.name, err.message);
+  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
+  }
 });

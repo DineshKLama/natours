@@ -94,6 +94,10 @@ const updateTour = catchAsync(async (req, res, next) => {
     return next(new AppError('No tour found with that ID', 404));
   }
 
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return next(new AppError('Payload is emply object'), 400);
+  }
+
   res.status(200).json({
     status: 'success',
     data: {

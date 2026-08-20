@@ -1,5 +1,6 @@
 import express from 'express';
 import userController from '../controllers/userController.js';
+import authController from '../controllers/authController.js';
 
 ///////////////////////////////////////////////
 // API ROUTES
@@ -7,6 +8,8 @@ import userController from '../controllers/userController.js';
 const userRouter = express.Router();
 
 // userRouter.param('id', )
+
+userRouter.post('/signup', authController.signup);
 
 userRouter
   .route('/')

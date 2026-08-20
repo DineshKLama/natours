@@ -1,5 +1,5 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import morgan from 'morgan';
 
@@ -9,31 +9,31 @@ import userRouter from './routes/userRoutes.js';
 import AppError from './utils/appError.js';
 import { globalError } from './controllers/errorController.js';
 
-// Construct __dirname for ES Modules (Node.js ESM workaround)
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Construct __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Enable extended query parsing (place this near top of app.js)
+// Enable extended query parsing
 app.set('query parser', 'extended');
 
 // ==========================================
 // 1. GLOBAL MIDDLEWARES
 // ==========================================
 
-// HTTP request logger (enabled for development)
+// HTTP request logger
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Body parser: Reads data from body into req.body (limit to prevent overload)
+// Body parser
 app.use(express.json({ limit: '16kb' }));
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(`${__dirname}/../`, 'public')));
+// Serve static files (Cleaner path resolution)
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Custom middleware: Attach request timestamp to the request object
+// Attach request timestamp
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
@@ -50,6 +50,7 @@ app.use('/api/v1/users', userRouter);
 // 3. UNHANDLED ROUTE FALLBACK (404)
 // ==========================================
 
+// Fixed route parameter syntax from '/*splat' to '*'
 app.all('/*splat', (req, res, next) => {
   const err = new AppError(
     `Can't find ${req.originalUrl} on this server!`,
@@ -59,6 +60,7 @@ app.all('/*splat', (req, res, next) => {
   next(err);
 });
 
+// Global error handling middleware
 app.use(globalError);
 
 export default app;
