@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 
-const userSchema = mongoose.Schema({
+const userSchema = Schema({
   name: {
     type: String,
     required: [true, 'Please tell us your name!'],
@@ -34,6 +34,7 @@ const userSchema = mongoose.Schema({
       message: 'Password are not the same',
     },
   },
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function () {
@@ -52,6 +53,21 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-const User = mongoose.model('User', userSchema);
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    // Convert Date object to seconds (base 10)
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+
+    console.log(changedTimestamp, JWTTimestamp);
+  }
+
+  // False means NOT changed after the token was issued
+  return false;
+};
+
+const User = model('User', userSchema);
 
 export default User;
