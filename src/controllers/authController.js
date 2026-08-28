@@ -9,13 +9,16 @@ const signToken = (id) => {
   });
 };
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
 const signup = catchAsync(async (req, res, next) => {
   // Just for err test
   // if (!req.body || Object.keys(req.body).length === 0) {
   //   return next(new AppError('Please provide required fields', 400));
   // }
 
-  const { name, email, password, passwordConfirm, passwordChangedAt } =
+  const { name, email, password, passwordConfirm, passwordChangedAt, role } =
     req.body;
 
   const newUser = await User.create({
@@ -24,6 +27,7 @@ const signup = catchAsync(async (req, res, next) => {
     password,
     passwordConfirm,
     passwordChangedAt,
+    role,
   });
 
   const token = signToken(newUser._id);
@@ -37,6 +41,9 @@ const signup = catchAsync(async (req, res, next) => {
   });
 });
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -47,6 +54,7 @@ const login = catchAsync(async (req, res, next) => {
 
   // 2) Check if user exists && password is correct
   const user = await User.findOne({ email }).select('+password');
+  console.log(user);
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
@@ -58,9 +66,13 @@ const login = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', token });
 });
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
 const protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -79,8 +91,9 @@ const protect = catchAsync(async (req, res, next) => {
   // console.log(decoded);
 
   // 3) Check if user still exists
-  const freshUser = await User.findById(decoded.id);
-  if (!freshUser) {
+  const currentUser = await User.findById(decoded.id);
+
+  if (!currentUser) {
     return next(
       new AppError(
         'The user belogning to this token does no longer exist.',
@@ -90,8 +103,15 @@ const protect = catchAsync(async (req, res, next) => {
   }
 
   // 4) Check if user changed password after the token was issued
-  freshUser.changedPasswordAfter(decoded.iat);
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password! please login again.', 401),
+    );
+  }
 
+  // Grant Access to proteted route
+
+  req.user = currentUser;
   next();
 });
 

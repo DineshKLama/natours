@@ -25,6 +25,6 @@ tourRouter
   .route('/:id')
   .get(tourController.getTour)
   .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
+  .delete(authController.protect, tourController.deleteTour);
 
 export default tourRouter;

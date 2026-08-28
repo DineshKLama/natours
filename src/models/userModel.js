@@ -17,6 +17,11 @@ const userSchema = Schema({
     validate: [validator.isEmail, 'Please provide a valid email'],
   },
   photo: String,
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user',
+  },
   password: {
     type: String,
     trim: true,
@@ -37,6 +42,7 @@ const userSchema = Schema({
   passwordChangedAt: Date,
 });
 
+// Encryting Password
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
 
@@ -46,6 +52,7 @@ userSchema.pre('save', async function () {
   this.passwordConfirm = undefined;
 });
 
+// Comparring Password
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword,
@@ -53,15 +60,18 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+// ///////////////////////////////
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
-    // Convert Date object to seconds (base 10)
-    const changedTimestamp = parseInt(
+    // Convert Date object to seconds and drop decimals
+    const changedTimestamp = Math.floor(
       this.passwordChangedAt.getTime() / 1000,
-      10,
     );
 
     console.log(changedTimestamp, JWTTimestamp);
+
+    // Returns true if the password was changed AFTER the token was issued
+    return JWTTimestamp < changedTimestamp;
   }
 
   // False means NOT changed after the token was issued
