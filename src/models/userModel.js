@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const userSchema = Schema({
   name: {
@@ -40,8 +41,11 @@ const userSchema = Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
+//////////////////////////////////////////////////////////////////////
 // Encryting Password
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
@@ -52,6 +56,7 @@ userSchema.pre('save', async function () {
   this.passwordConfirm = undefined;
 });
 
+////////////////////////////////////////////////////////////////////////
 // Comparring Password
 userSchema.methods.correctPassword = async function (
   candidatePassword,
@@ -60,7 +65,7 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-// ///////////////////////////////
+////////////////////////////////////////////////////////////////////////
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     // Convert Date object to seconds and drop decimals
@@ -76,6 +81,23 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
   // False means NOT changed after the token was issued
   return false;
+};
+
+//////////////////////////////////////////////////////////////////////
+// Password Reset
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken);
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 const User = model('User', userSchema);

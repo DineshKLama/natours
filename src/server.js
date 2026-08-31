@@ -32,36 +32,19 @@ import app from './app.js';
 import connectDB from './db/db.js';
 
 // 5. Bootstrap Server & Database connection
-let server;
 
-async function startServer() {
-  try {
-    await connectDB();
+await connectDB();
 
-    const PORT = process.env.PORT || 3000;
-    server = app.listen(PORT, () => {
-      console.log(
-        `App running on port ${PORT} in ${process.env.NODE_ENV || 'Production'} mode...`,
-      );
-    });
-  } catch (err) {
-    console.error('Failed to connect to DB, server not started:', err.message);
-    process.exit(1);
-  }
-}
+const PORT = process.env.PORT || 3000;
 
-startServer();
+app.listen(PORT, () => {
+  console.log(
+    `App running on port ${PORT} in ${process.env.NODE_ENV || 'Production'} mode...`,
+  );
+});
 
 // 6. Graceful shutdown on Unhandled Rejections
 process.on('unhandledRejection', (err) => {
   console.error(err.name, err.message);
   console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  } else {
-    process.exit(1);
-  }
 });

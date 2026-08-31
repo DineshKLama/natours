@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
 import { config } from 'dotenv';
+import mongoose from 'mongoose';
 import dns from 'node:dns/promises';
 import fs from 'node:fs';
-import Tour from '../../models/tourModel.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import Tour from '../../src/models/tourModel.js';
 
 // Globle Variables for ES Module
 const __dirname = dirname(fileURLToPath(import.meta.url));
